@@ -301,8 +301,16 @@
 
     function showAlert(msg, type) {
       const alertBox = document.getElementById("authAlert");
+      const authCard = document.querySelector(".auth-card");
       alertBox.innerText = msg;
       alertBox.className = `auth-alert ${type}`;
+      
+      if (type === "error" && authCard) {
+        authCard.classList.remove("shake");
+        void authCard.offsetWidth; // force reflow
+        authCard.classList.add("shake");
+        setTimeout(() => authCard.classList.remove("shake"), 500);
+      }
     }
   </script>
 

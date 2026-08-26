@@ -1,5 +1,5 @@
 /**
- * Student Book Store - Main Client Logic
+ * Student Book Store - Main Client Logic & Interactive Animations
  */
 
 // Default / Fallback Books Database
@@ -125,12 +125,46 @@ let currentSearch = "";
 // Initialize App on DOM Load
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
+  initScrollListeners();
   updateAuthUI();
   updateCounters();
   fetchBooks();
 });
 
-// Theme Management
+// Scroll Listeners for Sticky Header & Back to Top Button
+function initScrollListeners() {
+  const header = document.querySelector("header");
+  const backToTopBtn = document.getElementById("backToTopBtn");
+
+  window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    
+    if (header) {
+      if (scrollY > 20) {
+        header.classList.add("scrolled");
+      } else {
+        header.classList.remove("scrolled");
+      }
+    }
+
+    if (backToTopBtn) {
+      if (scrollY > 300) {
+        backToTopBtn.classList.add("visible");
+      } else {
+        backToTopBtn.classList.remove("visible");
+      }
+    }
+  });
+}
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+// Theme Management with Spin Animation
 function initTheme() {
   const savedTheme = localStorage.getItem("student_theme");
   if (savedTheme === "dark") {
@@ -140,6 +174,12 @@ function initTheme() {
 }
 
 function toggleTheme() {
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) {
+    btn.classList.add("spin");
+    setTimeout(() => btn.classList.remove("spin"), 500);
+  }
+
   const isDark = document.body.classList.toggle("dark");
   localStorage.setItem("student_theme", isDark ? "dark" : "light");
   updateThemeIcon(isDark);
@@ -188,7 +228,8 @@ async function fetchBooks() {
   if (container && allBooks.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align:center; padding: 40px;">
-        <h3>⏳ Loading textbooks...</h3>
+        <div style="font-size: 2.5rem; margin-bottom: 12px; display: inline-block; animation: floatSlow 2s ease-in-out infinite;">📚</div>
+        <h3>Loading textbooks catalog...</h3>
       </div>
     `;
   }
@@ -211,7 +252,7 @@ async function fetchBooks() {
   renderBooks();
 }
 
-// Render Books Grid
+// Render Books Grid with Staggered Entrance Animations
 function renderBooks() {
   const container = document.getElementById("booksGrid");
   if (!container) return;
@@ -249,15 +290,15 @@ function renderBooks() {
   }
 
   container.innerHTML = filtered
-    .map((book) => {
+    .map((book, index) => {
       const isWished = wishlist.some((item) => item.id === book.id);
       return `
-      <div class="book-card">
+      <div class="book-card animate-entrance" style="--anim-order: ${index}">
         <div class="card-img-wrapper">
           <img src="${book.img}" alt="${book.name}" loading="lazy">
           ${book.badge ? `<span class="card-badge">${book.badge}</span>` : ""}
           <button class="card-wish-btn ${isWished ? "wished" : ""}" 
-                  onclick="toggleWishlist(${book.id})" 
+                  onclick="toggleWishlist(${book.id}, event)" 
                   title="${isWished ? "Remove from wishlist" : "Add to wishlist"}">
             ${isWished ? "❤️" : "🤍"}
           </button>
@@ -278,7 +319,7 @@ function renderBooks() {
               <span class="card-price">₹${book.price}</span>
               ${book.originalPrice ? `<span class="card-original-price">₹${book.originalPrice}</span>` : ""}
             </div>
-            <button class="btn-add-cart" onclick="addToCart(${book.id})">
+            <button class="btn-add-cart" onclick="addToCart(${book.id}, event)">
               🛒 Add to Cart
             </button>
           </div>
@@ -321,8 +362,52 @@ function resetFilters() {
   renderBooks();
 }
 
+// Micro-Interaction: Fly Item to Cart Icon
+function animateFlyToCart(sourceBtn) {
+  const cartNavBtn = document.getElementById("navCart");
+  if (!sourceBtn || !cartNavBtn) {
+    triggerBadgeBump("cartCount");
+    return;
+  }
+
+  const startRect = sourceBtn.getBoundingClientRect();
+  const endRect = cartNavBtn.getBoundingClientRect();
+
+  const flyingOrb = document.createElement("div");
+  flyingOrb.className = "flying-cart-orb";
+  flyingOrb.innerText = "📖";
+  flyingOrb.style.left = `${startRect.left + startRect.width / 2 - 16}px`;
+  flyingOrb.style.top = `${startRect.top + startRect.height / 2 - 16}px`;
+  flyingOrb.style.opacity = "1";
+  flyingOrb.style.transform = "scale(1)";
+
+  document.body.appendChild(flyingOrb);
+
+  // Trigger animation next tick
+  requestAnimationFrame(() => {
+    flyingOrb.style.left = `${endRect.left + endRect.width / 2 - 16}px`;
+    flyingOrb.style.top = `${endRect.top + endRect.height / 2 - 16}px`;
+    flyingOrb.style.transform = "scale(0.3) rotate(360deg)";
+    flyingOrb.style.opacity = "0.7";
+  });
+
+  setTimeout(() => {
+    flyingOrb.remove();
+    triggerBadgeBump("cartCount");
+  }, 650);
+}
+
+// Micro-Interaction: Badge Counter Bump
+function triggerBadgeBump(badgeId) {
+  const badge = document.getElementById(badgeId);
+  if (!badge) return;
+  badge.classList.remove("bump");
+  void badge.offsetWidth; // Force DOM reflow to re-trigger animation
+  badge.classList.add("bump");
+}
+
 // Cart Operations
-function addToCart(bookId) {
+function addToCart(bookId, event) {
   const book = allBooks.find((b) => b.id === bookId);
   if (!book) return;
 
@@ -341,6 +426,13 @@ function addToCart(bookId) {
 
   saveCart();
   updateCounters();
+
+  if (event && event.currentTarget) {
+    animateFlyToCart(event.currentTarget);
+  } else {
+    triggerBadgeBump("cartCount");
+  }
+
   showToast(`"${book.name.substring(0, 24)}..." added to Cart! 🛒`, "success");
 }
 
@@ -350,20 +442,36 @@ function updateCartQty(bookId, delta) {
 
   cart[itemIndex].qty += delta;
   if (cart[itemIndex].qty <= 0) {
-    cart.splice(itemIndex, 1);
+    removeFromCart(bookId);
+    return;
   }
 
   saveCart();
   updateCounters();
+  triggerBadgeBump("cartCount");
   renderCart();
 }
 
 function removeFromCart(bookId) {
-  cart = cart.filter((item) => item.id !== bookId);
-  saveCart();
-  updateCounters();
-  renderCart();
-  showToast("Item removed from Cart", "info");
+  const itemCard = document.querySelector(`[data-cart-id="${bookId}"]`);
+  if (itemCard) {
+    itemCard.classList.add("removing");
+    setTimeout(() => {
+      cart = cart.filter((item) => item.id !== bookId);
+      saveCart();
+      updateCounters();
+      triggerBadgeBump("cartCount");
+      renderCart();
+      showToast("Item removed from Cart", "info");
+    }, 280);
+  } else {
+    cart = cart.filter((item) => item.id !== bookId);
+    saveCart();
+    updateCounters();
+    triggerBadgeBump("cartCount");
+    renderCart();
+    showToast("Item removed from Cart", "info");
+  }
 }
 
 function saveCart() {
@@ -394,7 +502,7 @@ function renderCart() {
   container.innerHTML = cart
     .map(
       (item) => `
-    <div class="cart-item-card">
+    <div class="cart-item-card" data-cart-id="${item.id}">
       <img src="${item.img}" alt="${item.name}" class="cart-item-img">
       <div class="cart-item-info">
         <h4 class="cart-item-title">${item.name}</h4>
@@ -428,7 +536,7 @@ function renderCart() {
         <span>Items Subtotal (${cart.reduce((s, i) => s + i.qty, 0)})</span>
         <span>₹${subtotal}</span>
       </div>
-      <div class="summary-row" style="color: var(--success);">
+      <div class="summary-row" style="color: var(--success); font-weight: 600;">
         <span>Student Discount (10%)</span>
         <span>-₹${discount}</span>
       </div>
@@ -444,10 +552,17 @@ function renderCart() {
   }
 }
 
-// Wishlist Operations
-function toggleWishlist(bookId) {
+// Wishlist Operations with Heart Pop Animation
+function toggleWishlist(bookId, event) {
   const book = allBooks.find((b) => b.id === bookId);
   if (!book) return;
+
+  const targetBtn = event ? event.currentTarget : null;
+  if (targetBtn) {
+    targetBtn.classList.remove("pop");
+    void targetBtn.offsetWidth;
+    targetBtn.classList.add("pop");
+  }
 
   const existingIndex = wishlist.findIndex((item) => item.id === bookId);
   if (existingIndex > -1) {
@@ -466,6 +581,7 @@ function toggleWishlist(bookId) {
 
   localStorage.setItem("student_wishlist", JSON.stringify(wishlist));
   updateCounters();
+  triggerBadgeBump("wishCount");
   renderBooks();
   if (document.getElementById("wishlistSection").style.display !== "none") {
     renderWishlist();
@@ -490,11 +606,11 @@ function renderWishlist() {
 
   container.innerHTML = wishlist
     .map(
-      (item) => `
-    <div class="book-card">
+      (item, index) => `
+    <div class="book-card animate-entrance" style="--anim-order: ${index}">
       <div class="card-img-wrapper">
         <img src="${item.img}" alt="${item.name}">
-        <button class="card-wish-btn wished" onclick="toggleWishlist(${item.id})" title="Remove from wishlist">
+        <button class="card-wish-btn wished" onclick="toggleWishlist(${item.id}, event)" title="Remove from wishlist">
           ❤️
         </button>
       </div>
@@ -503,7 +619,7 @@ function renderWishlist() {
         <h3 class="card-title">${item.name}</h3>
         <div class="card-footer">
           <span class="card-price">₹${item.price}</span>
-          <button class="btn-add-cart" onclick="addToCart(${item.id})">
+          <button class="btn-add-cart" onclick="addToCart(${item.id}, event)">
             🛒 Move to Cart
           </button>
         </div>
@@ -514,7 +630,7 @@ function renderWishlist() {
     .join("");
 }
 
-// Section Switching Navigation
+// Section Switching Navigation with Smooth Fade
 function showSection(sectionName) {
   const booksSec = document.getElementById("booksSection");
   const cartSec = document.getElementById("cartSection");
@@ -522,29 +638,47 @@ function showSection(sectionName) {
   const controlsSec = document.getElementById("controlsSection");
   const heroSec = document.getElementById("heroSection");
 
-  if (booksSec) booksSec.style.display = "none";
-  if (cartSec) cartSec.style.display = "none";
-  if (wishSec) wishSec.style.display = "none";
+  if (booksSec) {
+    booksSec.style.display = "none";
+    booksSec.classList.remove("section-fade");
+  }
+  if (cartSec) {
+    cartSec.style.display = "none";
+    cartSec.classList.remove("section-fade");
+  }
+  if (wishSec) {
+    wishSec.style.display = "none";
+    wishSec.classList.remove("section-fade");
+  }
 
   // Nav buttons
   document.querySelectorAll(".nav-btn").forEach((btn) => btn.classList.remove("active"));
 
   if (sectionName === "books") {
-    if (booksSec) booksSec.style.display = "block";
+    if (booksSec) {
+      booksSec.style.display = "block";
+      booksSec.classList.add("section-fade");
+    }
     if (controlsSec) controlsSec.style.display = "flex";
     if (heroSec) heroSec.style.display = "block";
     const navBooks = document.getElementById("navBooks");
     if (navBooks) navBooks.classList.add("active");
     renderBooks();
   } else if (sectionName === "cart") {
-    if (cartSec) cartSec.style.display = "block";
+    if (cartSec) {
+      cartSec.style.display = "block";
+      cartSec.classList.add("section-fade");
+    }
     if (controlsSec) controlsSec.style.display = "none";
     if (heroSec) heroSec.style.display = "none";
     const navCart = document.getElementById("navCart");
     if (navCart) navCart.classList.add("active");
     renderCart();
   } else if (sectionName === "wishlist") {
-    if (wishSec) wishSec.style.display = "block";
+    if (wishSec) {
+      wishSec.style.display = "block";
+      wishSec.classList.add("section-fade");
+    }
     if (controlsSec) controlsSec.style.display = "none";
     if (heroSec) heroSec.style.display = "none";
     const navWish = document.getElementById("navWish");
@@ -563,6 +697,27 @@ function updateCounters() {
   const totalCartQty = cart.reduce((sum, item) => sum + item.qty, 0);
   if (cartCountEl) cartCountEl.innerText = totalCartQty;
   if (wishCountEl) wishCountEl.innerText = wishlist.length;
+}
+
+// Confetti Celebration Burst in Modal
+function createCelebrationConfetti() {
+  const modalContent = document.querySelector("#orderSuccessModal .modal-content");
+  if (!modalContent) return;
+
+  const colors = ["#4f46e5", "#06b6d4", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6"];
+  
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.left = `${Math.random() * 85 + 5}%`;
+    piece.style.top = `${Math.random() * 20}%`;
+    piece.style.animationDelay = `${Math.random() * 0.4}s`;
+    piece.style.animationDuration = `${1.8 + Math.random() * 1}s`;
+    modalContent.appendChild(piece);
+
+    setTimeout(() => piece.remove(), 2600);
+  }
 }
 
 // Checkout & Order Placement
@@ -590,12 +745,10 @@ async function proceedCheckout() {
 
     const result = await res.json();
     if (result.success) {
-      // Clear Cart
       cart = [];
       saveCart();
       updateCounters();
 
-      // Show modal
       const modal = document.getElementById("orderSuccessModal");
       const orderDetails = document.getElementById("modalOrderDetails");
       if (orderDetails) {
@@ -608,7 +761,10 @@ async function proceedCheckout() {
           </p>
         `;
       }
-      if (modal) modal.classList.add("active");
+      if (modal) {
+        modal.classList.add("active");
+        createCelebrationConfetti();
+      }
       return;
     }
   } catch (err) {
@@ -632,7 +788,10 @@ async function proceedCheckout() {
       </p>
     `;
   }
-  if (modal) modal.classList.add("active");
+  if (modal) {
+    modal.classList.add("active");
+    createCelebrationConfetti();
+  }
 }
 
 function closeModal() {
@@ -641,7 +800,7 @@ function closeModal() {
   showSection("books");
 }
 
-// Toast Notifications
+// Toast Notifications with Animated Countdown Line
 function showToast(message, type = "info") {
   let container = document.getElementById("toast-container");
   if (!container) {
@@ -657,8 +816,8 @@ function showToast(message, type = "info") {
 
   setTimeout(() => {
     toast.style.opacity = "0";
-    toast.style.transform = "translateX(50px)";
-    toast.style.transition = "all 0.3s ease";
+    toast.style.transform = "translateX(60px) scale(0.9)";
+    toast.style.transition = "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
