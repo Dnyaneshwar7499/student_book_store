@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal | Login & Register</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      
+      <div class="auth-header">
+        <div class="auth-logo">📖</div>
+        <h2 id="formHeading">Student Login</h2>
+        <p id="formSubheading">Access your textbooks, wishlist & orders</p>
+      </div>
+
+      <!-- Alert for feedback -->
+      <div id="authAlert" class="auth-alert"></div>
+
+      <!-- Auth Tabs: Sign In / Sign Up -->
+      <div class="auth-tabs">
+        <button type="button" id="tabLogin" class="auth-tab active" onclick="switchTab('login')">
+          🔑 Sign In
+        </button>
+        <button type="button" id="tabRegister" class="auth-tab" onclick="switchTab('register')">
+          ✨ New Student (Sign Up)
+        </button>
+      </div>
+
+      <!-- Login / Register Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        
+        <!-- Full Name (Only for Register) -->
+        <div class="form-group" id="nameGroup" style="display: none;">
+          <label class="form-label" for="authFullName">Full Name</label>
+          <div class="input-with-icon">
+            <span class="input-icon">👤</span>
+            <input 
+              type="text" 
+              id="authFullName" 
+              class="auth-input" 
+              placeholder="e.g. Daneshwar Munde"
+            >
+          </div>
+        </div>
+
+        <!-- Username / Email -->
+        <div class="form-group">
+          <label class="form-label" for="authUsername">Username or Student ID</label>
+          <div class="input-with-icon">
+            <span class="input-icon">🎓</span>
+            <input 
+              type="text" 
+              id="authUsername" 
+              class="auth-input" 
+              placeholder="Enter your username" 
+              required
+              autocomplete="username"
+            >
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="authPassword">Password</label>
+          <div class="input-with-icon" style="display: flex; align-items: center;">
+            <span class="input-icon">🔒</span>
+            <input 
+              type="password" 
+              id="authPassword" 
+              class="auth-input" 
+              placeholder="Enter password" 
+              required
+              autocomplete="current-password"
+              style="padding-right: 44px;"
+            >
+            <button 
+              type="button" 
+              id="togglePasswordBtn"
+              onclick="togglePasswordVisibility()" 
+              style="position: absolute; right: 12px; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"
+              title="Show/Hide Password"
+            >
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btnSubmitAuth" class="btn-auth-submit">
+          Sign In 🚀
+        </button>
+      </form>
+
+      <!-- Mode Switcher Helper Link -->
+      <div id="modeHelper" style="text-align: center; margin-top: 16px; font-size: 0.9rem;">
+        <span id="helperText">New here? </span>
+        <a href="javascript:void(0)" id="helperLink" onclick="switchTab('register')" style="color: var(--primary); font-weight: 700;">
+          Create a new account
+        </a>
+      </div>
+
+      <!-- Quick Demo Credentials Hint -->
+      <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 12px; margin-top: 20px; font-size: 0.84rem; color: var(--text-muted); text-align: center; border: 1px dashed var(--border);">
+        💡 <strong>Default Account:</strong> User: <code>student</code> | Pass: <code>password123</code>
+      </div>
+
+      <div class="auth-footer-links">
+        <p><a href="index.html">← Continue to Book Store without Login</a></p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let currentMode = "login"; // 'login' or 'register'
+
+    // Determine Base URL (works both on http://localhost:5000 and direct file://)
+    const API_BASE = (window.location.protocol === "http:" || window.location.protocol === "https:")
+      ? ""
+      : "http://localhost:5000";
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem("student_theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById("authPassword");
+      const btn = document.getElementById("togglePasswordBtn");
+      if (passInput.type === "password") {
+        passInput.type = "text";
+        btn.innerText = "🙈";
+      } else {
+        passInput.type = "password";
+        btn.innerText = "👁️";
+      }
+    }
+
+    function switchTab(mode) {
+      currentMode = mode;
+      const tabLogin = document.getElementById("tabLogin");
+      const tabRegister = document.getElementById("tabRegister");
+      const nameGroup = document.getElementById("nameGroup");
+      const btnSubmit = document.getElementById("btnSubmitAuth");
+      const heading = document.getElementById("formHeading");
+      const subheading = document.getElementById("formSubheading");
+      const helperText = document.getElementById("helperText");
+      const helperLink = document.getElementById("helperLink");
+      const alertBox = document.getElementById("authAlert");
+
+      alertBox.className = "auth-alert";
+      alertBox.style.display = "none";
+
+      if (mode === "login") {
+        tabLogin.classList.add("active");
+        tabRegister.classList.remove("active");
+        nameGroup.style.display = "none";
+        heading.innerText = "Student Login";
+        subheading.innerText = "Access your textbooks, wishlist & orders";
+        btnSubmit.innerText = "Sign In 🚀";
+        helperText.innerText = "New here? ";
+        helperLink.innerText = "Create a new account";
+        helperLink.onclick = () => switchTab('register');
+      } else {
+        tabRegister.classList.add("active");
+        tabLogin.classList.remove("active");
+        nameGroup.style.display = "block";
+        heading.innerText = "Create Student Account";
+        subheading.innerText = "Sign up to buy textbooks with student discount";
+        btnSubmit.innerText = "Create Account 🎉";
+        helperText.innerText = "Already have an account? ";
+        helperLink.innerText = "Sign In instead";
+        helperLink.onclick = () => switchTab('login');
+      }
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById("authUsername");
+      const passwordInput = document.getElementById("authPassword");
+      const fullNameInput = document.getElementById("authFullName");
+      const btnSubmit = document.getElementById("btnSubmitAuth");
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const fullName = fullNameInput.value.trim();
+
+      if (!username || !password) {
+        showAlert("Please fill in both username and password", "error");
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      btnSubmit.innerText = "Processing...";
+
+      // Local storage database for offline / fallback compatibility
+      let localUsers = JSON.parse(localStorage.getItem("student_users_db")) || [
+        { username: "student", password: "password123", name: "Student User", role: "student" },
+        { username: "daneshwar", password: "123", name: "Daneshwar Munde", role: "admin" }
+      ];
+
+      // Try Backend API First
+      try {
+        const endpoint = currentMode === "login" 
+          ? `${API_BASE}/api/login` 
+          : `${API_BASE}/api/register`;
+
+        const payload = currentMode === "login"
+          ? { username, password }
+          : { username, password, name: fullName || username };
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showAlert(`✅ ${data.message || "Success!"} Redirecting to store...`, "success");
+          
+          // Save active session
+          localStorage.setItem("student_user", JSON.stringify(data.user));
+          
+          // Also sync local cache
+          if (currentMode === "register") {
+            localUsers.push(data.user);
+            localStorage.setItem("student_users_db", JSON.stringify(localUsers));
+          }
+
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 800);
+          return;
+        } else {
+          // If server returned specific error (e.g. Invalid credentials or User already exists)
+          throw new Error(data.message || "Authentication failed");
+        }
+      } catch (err) {
+        console.warn("Server API failed or unreachable, trying local fallback:", err.message);
+
+        // Client-side fallback handler so it ALWAYS works smoothly
+        if (currentMode === "register") {
+          const existing = localUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+          if (existing) {
+            showAlert(`Username "${username}" already exists. Please Sign In or pick another username.`, "error");
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "Create Account 🎉";
+            return;
+          }
+
+          const newUser = {
+            username: username,
+            password: password,
+            name: fullName || username,
+            role: "student"
+          };
+          localUsers.push(newUser);
+          localStorage.setItem("student_users_db", JSON.stringify(localUsers));
+          localStorage.setItem("student_user", JSON.stringify(newUser));
+
+          showAlert("🎉 Account created successfully! Redirecting...", "success");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 800);
+          return;
+        } else {
+          // Mode is Login
+          const matched = localUsers.find(
+            u => u.username.toLowerCase() === username.toLowerCase() && u.password === password
+          );
+
+          if (matched) {
+            localStorage.setItem("student_user", JSON.stringify(matched));
+            showAlert(`✅ Welcome back, ${matched.name || matched.username}! Redirecting...`, "success");
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 800);
+            return;
+          } else {
+            const userExists = localUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+            if (!userExists) {
+              showAlert(
+                `Account "${username}" not found. Click 'New Student' tab above to create an account!`, 
+                "error"
+              );
+            } else {
+              showAlert("Incorrect password. Please try again.", "error");
+            }
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "Sign In 🚀";
+          }
+        }
+      }
+    }
+
+    function showAlert(msg, type) {
+      const alertBox = document.getElementById("authAlert");
+      alertBox.innerText = msg;
+      alertBox.className = `auth-alert ${type}`;
+    }
+  </script>
+
+</body>
+</html>

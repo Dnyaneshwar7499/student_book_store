@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Student Book Store - Buy Computer Science, Engineering, AI, and Academic Textbooks at student-friendly prices.">
+  <title>Student Book Store | Engineering & Academic Textbooks</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header>
+    <div class="nav-container">
+      <div class="logo" onclick="showSection('books')">
+        <span class="logo-icon">📖</span>
+        <span>StudentBook</span>
+      </div>
+
+      <nav class="nav-links">
+        <button id="navBooks" class="nav-btn active" onclick="showSection('books')">
+          <span>📚 Books</span>
+        </button>
+        
+        <button id="navWish" class="nav-btn" onclick="showSection('wishlist')">
+          <span>❤️ Wishlist</span>
+          <span id="wishCount" class="badge">0</span>
+        </button>
+
+        <button id="navCart" class="nav-btn" onclick="showSection('cart')">
+          <span>🛒 Cart</span>
+          <span id="cartCount" class="badge">0</span>
+        </button>
+
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          🌙
+        </button>
+
+        <div id="navAuthContainer" style="display: flex; align-items: center; gap: 8px;">
+          <!-- Populated by script.js -->
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="heroSection">
+    <div class="hero-content">
+      <h2>Academic & Engineering Textbooks</h2>
+      <p>Get instant access to top-rated college textbooks, reference guides, and coding handbooks with student discounts.</p>
+      
+      <div class="hero-features">
+        <div class="feature-pill">⚡ Fast Campus Delivery</div>
+        <div class="feature-pill">🎯 100% Genuine Editions</div>
+        <div class="feature-pill">🏷️ 10% Student Discount Applied</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search & Category Filter Section -->
+  <section class="controls-section" id="controlsSection">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search by title, author, or subject..." 
+        oninput="handleSearch(this.value)"
+      >
+    </div>
+
+    <div class="filter-categories">
+      <button class="cat-btn active" onclick="filterCategory('all', this)">All Books</button>
+      <button class="cat-btn" onclick="filterCategory('Programming', this)">Programming</button>
+      <button class="cat-btn" onclick="filterCategory('AI', this)">AI & ML</button>
+      <button class="cat-btn" onclick="filterCategory('Networking', this)">Networking</button>
+      <button class="cat-btn" onclick="filterCategory('Security', this)">Cyber Security</button>
+      <button class="cat-btn" onclick="filterCategory('Database', this)">Databases</button>
+    </div>
+  </section>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+
+    <!-- 1. Books Catalog Section -->
+    <section id="booksSection">
+      <div class="section-header">
+        <h2 class="section-title">Available Textbooks</h2>
+      </div>
+      <div class="books-grid" id="booksGrid">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </section>
+
+    <!-- 2. Cart Section -->
+    <section id="cartSection" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">🛒 Your Shopping Cart</h2>
+        <button class="nav-btn" onclick="showSection('books')" style="background: var(--bg-subtle);">
+          ← Continue Shopping
+        </button>
+      </div>
+
+      <div class="cart-layout">
+        <div class="cart-items-container" id="cartItemsList">
+          <!-- Populated by script.js -->
+        </div>
+
+        <div class="cart-summary-card" id="cartSummary">
+          <h3 class="summary-title">Order Summary</h3>
+          <div id="summaryValues">
+            <!-- Populated by script.js -->
+          </div>
+          <button class="btn-checkout" onclick="proceedCheckout()">
+            Proceed to Checkout 🚀
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Wishlist Section -->
+    <section id="wishlistSection" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">❤️ Your Saved Wishlist</h2>
+        <button class="nav-btn" onclick="showSection('books')" style="background: var(--bg-subtle);">
+          ← Back to Catalog
+        </button>
+      </div>
+      <div class="books-grid" id="wishlistGrid">
+        <!-- Populated by script.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Order Success Modal -->
+  <div class="modal-overlay" id="orderSuccessModal">
+    <div class="modal-content">
+      <div style="font-size: 3.5rem; margin-bottom: 12px;">🎉</div>
+      <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 8px;">Order Placed Successfully!</h2>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">Thank you for studying with StudentBook Store.</p>
+      
+      <div id="modalOrderDetails" style="text-align: left; background: var(--bg-subtle); padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px; font-size: 0.95rem;">
+        <!-- Filled dynamically -->
+      </div>
+
+      <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="closeModal()">
+        Continue Shopping 📚
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Student Book Store. Designed for College & University Students.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
