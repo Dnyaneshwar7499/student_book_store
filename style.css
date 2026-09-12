@@ -523,6 +523,13 @@ header.scrolled {
   flex-direction: column;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.book-card:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .book-card:hover {
@@ -534,20 +541,103 @@ header.scrolled {
 .card-img-wrapper {
   position: relative;
   width: 100%;
-  height: 200px;
-  background: var(--bg-subtle);
+  height: 290px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+body.dark .card-img-wrapper {
+  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
 }
 
 .card-img-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.45);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
 }
 
 .book-card:hover .card-img-wrapper img {
-  transform: scale(1.08);
+  transform: translateY(-6px) scale(1.04) rotate(-0.5deg);
+  box-shadow: -6px 12px 24px rgba(0, 0, 0, 0.6);
+}
+
+.card-gallery-count {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.card-look-inside-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  z-index: 3;
+}
+
+.card-look-inside-overlay span {
+  background: var(--primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.5);
+  transform: translateY(12px) scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.book-card:hover .card-look-inside-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+.book-card:hover .card-look-inside-overlay span {
+  transform: translateY(0) scale(1);
+}
+
+.card-discount-tag {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 2px;
+  width: fit-content;
+}
+
+body.dark .card-discount-tag {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }
 
 .card-badge {
@@ -1279,6 +1369,1065 @@ body.dark .card-wish-btn {
 }
 .toast.info::after {
   background: var(--accent);
+}
+
+/* ==========================================================
+   Flipkart-Style Book Detail & Multi-Image Gallery Modal
+   ========================================================== */
+
+.book-modal-overlay {
+  z-index: 1100;
+  padding: 16px;
+  background: rgba(10, 15, 29, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.book-modal-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  max-width: 1200px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  position: relative;
+  transform: scale(0.92) translateY(24px);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-focus) transparent;
+}
+
+.book-modal-overlay.active .book-modal-container {
+  transform: scale(1) translateY(0);
+}
+
+.book-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  cursor: pointer;
+  transition: var(--transition-spring);
+  box-shadow: var(--shadow-sm);
+}
+
+.book-modal-close:hover {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* Modal 2-Column Layout */
+.modal-detail-layout {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 32px;
+  padding: 32px;
+  background: var(--bg-surface);
+  position: relative;
+}
+
+/* --- Left Column: Gallery --- */
+.modal-gallery-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  align-self: start;
+}
+
+.modal-gallery-main-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Vertical Thumbnails Strip (Flipkart Style) */
+.modal-thumbnails-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.modal-thumb-item {
+  width: 68px;
+  height: 78px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.modal-thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.modal-thumb-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.modal-thumb-item.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.35);
+}
+
+.modal-thumb-item .thumb-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 1px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Main Image Box with Magnifier Lens */
+.modal-main-image-container {
+  flex: 1;
+  position: relative;
+}
+
+.modal-main-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-active-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: opacity 0.15s ease;
+  user-select: none;
+}
+
+/* Floating Zoom Lens (Flipkart Magnifier) */
+.modal-zoom-lens {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 1.5px solid var(--primary);
+  background-color: rgba(79, 70, 229, 0.15);
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
+  display: none;
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+/* Zoom Result Flyout */
+.modal-zoom-result {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 18px);
+  width: 440px;
+  height: 420px;
+  background-repeat: no-repeat;
+  border: 2px solid var(--border-focus);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--bg-surface);
+  z-index: 100;
+  display: none;
+  pointer-events: none;
+}
+
+.modal-img-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--badge-gradient);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  z-index: 5;
+}
+
+.modal-img-counter {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  z-index: 5;
+}
+
+.modal-wish-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-spring);
+  z-index: 5;
+}
+
+.modal-wish-btn:hover {
+  transform: scale(1.15);
+  color: #ef4444;
+}
+
+.modal-wish-btn.wished {
+  color: #ef4444;
+}
+
+.gallery-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 6;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  opacity: 0.75;
+}
+
+body.dark .gallery-nav-arrow {
+  background: rgba(30, 41, 59, 0.85);
+  color: #fff;
+}
+
+.gallery-nav-arrow:hover {
+  opacity: 1;
+  background: var(--primary);
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-nav-arrow.prev {
+  left: 10px;
+}
+
+.gallery-nav-arrow.next {
+  right: 10px;
+}
+
+/* Flipkart Style Big Action Buttons */
+.modal-action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.btn-flipkart-cart {
+  background: #ff9f00;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(255, 159, 0, 0.35);
+  transition: var(--transition-spring);
+}
+
+.btn-flipkart-cart:hover {
+  background: #f39400;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 159, 0, 0.45);
+}
+
+.btn-flipkart-buy {
+  background: #fb641b;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(251, 100, 27, 0.35);
+  transition: var(--transition-spring);
+}
+
+.btn-flipkart-buy:hover {
+  background: #ea560d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(251, 100, 27, 0.45);
+}
+
+.modal-guarantee-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-subtle);
+  border: 1px dashed var(--border);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.guarantee-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+/* --- Right Column: Book Information --- */
+.modal-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-breadcrumbs {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.modal-breadcrumbs .active-crumb {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.modal-book-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.modal-book-author {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: -8px;
+}
+
+.modal-book-author .author-name {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Rating Pill */
+.modal-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-rating-badge {
+  background: #388e3c;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-review-summary {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.modal-assured-badge {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--border-focus);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+/* Price Box */
+.modal-price-box {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+
+.modal-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.modal-current-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.modal-orig-price {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.modal-discount-percent {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #388e3c;
+}
+
+body.dark .modal-discount-percent {
+  color: #4ade80;
+}
+
+.modal-savings-tag {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #15803d;
+  margin-top: 6px;
+}
+
+body.dark .modal-savings-tag {
+  color: #86efac;
+}
+
+/* Offers Section */
+.modal-offers-section {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+}
+
+.offers-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text-main);
+}
+
+.offer-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.86rem;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.offer-row:last-child {
+  margin-bottom: 0;
+}
+
+.offer-tag {
+  background: var(--success);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Delivery Pincode Checker */
+.modal-delivery-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+}
+
+.delivery-header {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.delivery-input-group {
+  display: flex;
+  gap: 8px;
+  max-width: 360px;
+}
+
+.delivery-input-group input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.delivery-input-group input:focus {
+  border-color: var(--primary);
+}
+
+.btn-check-pin {
+  background: var(--primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.btn-check-pin:hover {
+  background: var(--primary-hover);
+}
+
+/* Section Subtitles */
+.section-subtitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+
+/* Highlights */
+.highlights-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.highlights-list li {
+  font-size: 0.88rem;
+  color: var(--text-main);
+  position: relative;
+  padding-left: 20px;
+}
+
+.highlights-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: 800;
+}
+
+/* Specs Table */
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.specs-table tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.specs-table tr:last-child {
+  border-bottom: none;
+}
+
+.spec-label {
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  width: 35%;
+  background: var(--bg-subtle);
+}
+
+.spec-value {
+  padding: 8px 12px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* Description */
+.modal-description-text {
+  font-size: 0.92rem;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* Reviews */
+.reviews-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.student-review-card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.rev-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.rev-user {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.rev-stars {
+  background: #388e3c;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rev-comment {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Responsive Styles for Modal */
+@media (max-width: 992px) {
+  .modal-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px 18px;
+  }
+
+  .modal-gallery-column {
+    position: static;
+  }
+
+  .modal-gallery-main-row {
+    flex-direction: column-reverse;
+  }
+
+  .modal-thumbnails-strip {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .modal-thumb-item {
+    width: 60px;
+    height: 70px;
+    flex-shrink: 0;
+  }
+
+  .modal-main-img-wrap {
+    height: 320px;
+  }
+
+  .modal-zoom-result {
+    display: none !important; /* disable hover flyout on mobile/tablet */
+  }
+}
+
+@media (max-width: 540px) {
+  .modal-action-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-book-title {
+    font-size: 1.35rem;
+  }
+
+  .modal-prices {
+    flex-wrap: wrap;
+  }
+}
+
+/* Flipkart Look Inside Action Button */
+.btn-flipkart-look-inside {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1.5px solid var(--border-focus);
+  font-size: 0.92rem;
+  font-weight: 800;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition-spring);
+  width: 100%;
+}
+
+.btn-flipkart-look-inside:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+}
+
+/* Fullscreen Zoom Trigger on Main Image */
+.modal-fullscreen-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  z-index: 5;
+  transition: var(--transition);
+}
+
+.modal-fullscreen-btn:hover {
+  background: var(--primary);
+  transform: scale(1.1);
+}
+
+/* ==========================================================
+   Interactive "Look Inside" Sample Page Reader Modal
+   ========================================================== */
+
+.reader-modal-overlay {
+  z-index: 1200;
+  padding: 16px;
+  background: rgba(10, 15, 29, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.reader-modal-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  max-width: 860px;
+  width: 100%;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.reader-modal-overlay.active .reader-modal-container {
+  transform: scale(1) translateY(0);
+}
+
+.reader-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+}
+
+.reader-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reader-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reader-book-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.reader-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reader-page-pill {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  color: var(--text-main);
+}
+
+.reader-close-btn {
+  position: static;
+  width: 34px;
+  height: 34px;
+}
+
+.reader-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+}
+
+.reader-page-frame {
+  max-width: 480px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.reader-page-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+
+.reader-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  gap: 12px;
+}
+
+.reader-nav-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.reader-nav-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.reader-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reader-thumbnails-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 4px;
+}
+
+.reader-nav-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.reader-nav-dot.active {
+  background: var(--primary);
+  transform: scale(1.25);
+}
+
+/* ==========================================================
+   Fullscreen Lightbox Image Viewer
+   ========================================================== */
+
+.lightbox-overlay {
+  z-index: 1300;
+  background: rgba(3, 7, 18, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.lightbox-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  user-select: none;
+  transition: transform 0.3s ease;
+}
+
+.lightbox-caption {
+  margin-top: 14px;
+  color: #f8fafc;
+  font-size: 1rem;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -46px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.lightbox-close:hover {
+  background: var(--danger);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.lightbox-nav:hover {
+  background: var(--primary);
+  transform: translateY(-50%) scale(1.15);
+}
+
+.lightbox-nav.prev {
+  left: -60px;
+}
+
+.lightbox-nav.next {
+  right: -60px;
+}
+
+@media (max-width: 768px) {
+  .lightbox-nav.prev {
+    left: 10px;
+  }
+  .lightbox-nav.next {
+    right: 10px;
+  }
 }
 
 /* Modal */

@@ -134,6 +134,53 @@
 
   </main>
 
+  <!-- Flipkart-Style Book Detail & Multi-Image Gallery Modal -->
+  <div class="modal-overlay book-modal-overlay" id="bookDetailModal" onclick="handleBookModalBackdrop(event)" role="dialog" aria-modal="true" aria-label="Book Details">
+    <div class="book-modal-container">
+      <button class="book-modal-close" onclick="closeBookModal()" title="Close (Esc)" aria-label="Close modal">✕</button>
+      <div class="book-modal-body" id="bookModalBody">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive "Look Inside" Sample Page Reader Modal -->
+  <div class="modal-overlay reader-modal-overlay" id="sampleReaderModal" onclick="handleReaderModalBackdrop(event)" role="dialog" aria-modal="true" aria-label="Sample Page Reader">
+    <div class="reader-modal-container">
+      <div class="reader-modal-header">
+        <div class="reader-title-group">
+          <span class="reader-badge">📖 Look Inside Sample Preview</span>
+          <h3 id="readerBookTitle" class="reader-book-title">Book Title</h3>
+        </div>
+        <div class="reader-header-actions">
+          <span id="readerPageIndicator" class="reader-page-pill">Page 1 / 4</span>
+          <button class="book-modal-close reader-close-btn" onclick="closeSampleReader()" title="Close Reader (Esc)">✕</button>
+        </div>
+      </div>
+      
+      <div class="reader-modal-body" id="readerModalBody">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+
+      <div class="reader-modal-footer">
+        <button class="reader-nav-btn" id="readerPrevBtn" onclick="prevSamplePage()">‹ Previous Page</button>
+        <div class="reader-thumbnails-nav" id="readerThumbsNav"></div>
+        <button class="reader-nav-btn" id="readerNextBtn" onclick="nextSamplePage()">Next Page ›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Image Lightbox Modal -->
+  <div class="modal-overlay lightbox-overlay" id="imageLightboxModal" onclick="handleLightboxBackdrop(event)" role="dialog" aria-modal="true" aria-label="Fullscreen Image">
+    <div class="lightbox-container">
+      <button class="lightbox-close" onclick="closeLightbox()" title="Close (Esc)">✕</button>
+      <img id="lightboxImg" class="lightbox-img" src="" alt="Enlarged book view">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+      <button class="lightbox-nav prev" onclick="lightboxPrev(event)" title="Previous">‹</button>
+      <button class="lightbox-nav next" onclick="lightboxNext(event)" title="Next">›</button>
+    </div>
+  </div>
+
   <!-- Order Success Modal -->
   <div class="modal-overlay" id="orderSuccessModal">
     <div class="modal-content">
